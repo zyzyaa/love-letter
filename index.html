@@ -4,186 +4,55 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Письмо</title>
-  <style>
-    :root { --bg: #0b0f1a; --paper: #ffffff; --env: #f1f1f1; --shadow: rgba(0,0,0,.25); }
-    * { box-sizing: border-box; }
-    body{
-      margin:0; height:100vh; display:flex; align-items:center; justify-content:center;
-      background: radial-gradient(1200px 800px at 50% 30%, #1a2140 0%, var(--bg) 60%);
-      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-      overflow:hidden;
-      user-select:none;
-      -webkit-tap-highlight-color: transparent;
-    }
-    .hint{
-      position:fixed; top:18px; left:0; right:0; text-align:center;
-      font-size:14px; opacity:.75; color:#cdd6ff; padding:0 14px;
-    }
-
-    /* Stage container */
-    .scene{
-      width:min(360px, 92vw);
-      height:min(520px, 86vh);
-      position:relative;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-    }
-
-    /* Envelope wrapper */
-    .envelope-wrap{
-      width:min(320px, 84vw);
-      height:220px;
-      position:relative;
-      transform: translateY(24px);
-      filter: drop-shadow(0 18px 30px var(--shadow));
-      cursor:pointer;
-    }
-
-    /* Pulse while sealed */
-    .stage-1 .envelope-wrap{
-      animation: pulse 1.6s ease-in-out infinite;
-    }
-    @keyframes pulse{
-      0%,100%{ transform: translateY(24px) scale(1); }
-      50%{ transform: translateY(24px) scale(1.03); }
-    }
-
-    /* Envelope body */
-    .env{
-      position:absolute; inset:0;
-      background: linear-gradient(180deg, #f7f7f7, var(--env));
-      border-radius: 18px;
-      overflow:hidden;
-    }
-
-    /* Flap */
-    .flap{
-      position:absolute; left:-2px; right:-2px; top:-2px; height:62%;
-      background: linear-gradient(180deg, #fbfbfb, #e9e9e9);
-      transform-origin: top center;
-      transform: rotateX(0deg);
-      transition: transform 900ms cubic-bezier(.2,.9,.2,1);
-      clip-path: polygon(0 0, 100% 0, 50% 85%);
-      border-top-left-radius: 18px;
-      border-top-right-radius: 18px;
-      box-shadow: 0 10px 18px rgba(0,0,0,.08);
-    }
-
-    /* Front triangles to look like envelope */
-    .front-left, .front-right{
-      position:absolute; bottom:0; width:52%; height:70%;
-      background: linear-gradient(180deg, #f0f0f0, #e1e1e1);
-      clip-path: polygon(0 100%, 100% 0, 100% 100%);
-      opacity:.95;
-    }
-    .front-left{ left:0; }
-    .front-right{
-      right:0;
-      transform: scaleX(-1);
-    }
-    .front-bottom{
-      position:absolute; left:0; right:0; bottom:0; height:62%;
-      background: linear-gradient(180deg, #efefef, #dedede);
-      clip-path: polygon(0 0, 50% 70%, 100% 0, 100% 100%, 0 100%);
-    }
-
-    /* Letter (paper) */
-    .letter{
-      position:absolute;
-      left:18px; right:18px;
-      bottom:20px;
-      height: 0px;
-      background: linear-gradient(180deg, #ffffff, #f6f6ff);
-      border-radius: 14px;
-      overflow:hidden;
-      box-shadow: 0 10px 26px rgba(0,0,0,.18);
-      transition:
-        height 1100ms cubic-bezier(.2,.9,.2,1),
-        transform 1100ms cubic-bezier(.2,.9,.2,1);
-      transform: translateY(0px);
-      cursor:pointer;
-    }
-    .letter-inner{
-      padding: 18px 18px 22px;
-      color:#111827;
-      line-height:1.5;
-      font-size:15px;
-      opacity:0;
-      transition: opacity 400ms ease;
-    }
-    .letter-title{
-      font-weight: 700;
-      font-size: 17px;
-      margin: 0 0 10px 0;
-    }
-    .letter-text{
-      white-space: pre-wrap;
-      margin:0;
-    }
-
-    /* Stage 2: envelope open + paper slides out (still "closed") */
-    .stage-2 .flap{ transform: rotateX(165deg); }
-    .stage-2 .letter{
-      height: 210px;
-      transform: translateY(-56px);
-    }
-    .stage-2 .hint::after{ content:""; }
-
-    /* Stage 3: paper unfolds and shows text */
-    .stage-3 .letter{
-      height: 440px;
-      transform: translateY(-170px);
-    }
-    .stage-3 .letter-inner{ opacity:1; }
-
-    /* Small “fold line” effect */
-    .fold{
-      position:absolute; left:0; right:0; top:46px; height:1px;
-      background: rgba(0,0,0,.08);
-    }
-
-    /* Prevent selecting */
-    .no-select{ -webkit-user-select:none; user-select:none; }
-  </style>
+  <link rel="stylesheet" href="settings.css" />
 </head>
 <body class="stage-1">
   <div class="hint no-select" id="hint">Нажми на конверт ✉️</div>
-
   <div class="scene">
-    <div class="envelope-wrap" id="envelope" role="button" aria-label="Конверт">
-      <div class="env"></div>
-      <div class="flap"></div>
-      <div class="front-left"></div>
-      <div class="front-right"></div>
-      <div class="front-bottom"></div>
-
-      <div class="letter" id="letter" role="button" aria-label="Лист">
-        <div class="fold"></div>
-        <div class="letter-inner" id="letterInner">
-          <div class="letter-title">Моё письмо тебе</div>
-          <p class="letter-text" id="letterText"></p>
+      <div class="envelope-wrap" id="envelope" role="button" aria-label="Конверт">
+        <div class="shell shell-back" id="shell" aria-hidden="true">
+          <div class="env"></div>
+          <div class="flap"></div>
         </div>
-      </div>
-    </div>
-  </div>
 
+        <!-- Письмо отдельно, чтобы конверт мог улетать -->
+        <div class="letter" id="letter" role="button" aria-label="Лист">
+          <div class="fold"></div>
+          <div class="letter-inner" id="letterInner">
+            <p class="letter-text" id="letterText"></p>
+          </div>
+        </div>
+        <div class="shell shell-front" aria-hidden="true">
+          <div class="front-left"></div>
+          <div class="front-right"></div>
+          <div class="front-bottom"></div>
+
+          <div class="seal" id="seal">
+            <span class="crack" aria-hidden="true"></span>
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+            </svg>
+          </div>
+        </div>
+
+      </div>
+  </div>
   <script>
     // Вставь сюда текст письма
     const LETTER_TEXT =
 `
 Здравствуй, Юлечка!
 
-Если ты это читаешь, то могу тебя поздравить - ты получила письмо Любви!
-Я хочу сказать тебе на сколько ты красивая, добрая, весёлая, сногшебательная!
-Ты идеальна во всём, у тебя нету минусов, ты просто прелесть!
-Я до безумия рад, что мы нашли друг друга и я счастлив, что у нас все идет к отношениям!
-Я обожаю всё, твой запах, твою улыбку, твои глаза, твою душу!
-Да что уж там, я просто тебя обожаю!
-Я верю, что у нас с тобой все получится, все будет хорошо и мы будем вместе!
-Я с нетерпением жду твоих спрятанных чувств и пропажу твоего страха!
-Я хочу что бы ты мне верила, доверяла, ведь без этого отношения не отношения!
-Я готов делать всё - ждать, доверять, любить!
+Если ты это читаешь, то могу тебя поздравить — ты получила письмо любви!
+Я хочу сказать тебе, насколько ты красивая, добрая, весёлая, сногсшибательная!
+Ты идеальна во всём, у тебя нет минусов — ты просто прелесть!
+Я до безумия рад, что мы нашли друг друга, и счастлив, что у нас всё идёт к отношениям!
+Я обожаю всё: твой запах, твою улыбку, твои глаза, твою душу!
+Да что уж там — я просто тебя обожаю!
+Я верю, что у нас с тобой всё получится, всё будет хорошо, и мы будем вместе!
+Я с нетерпением жду твоих спрятанных чувств и исчезновения твоего страха.
+Я хочу, чтобы ты мне верила и доверяла, ведь без этого отношения — не отношения!
+Я готов на всё: ждать, доверять, любить!
 Я верю в наше будущее и надеюсь, что ты тоже!
 
 С любовью, твой Денис! 🤍
@@ -195,33 +64,67 @@
     const envelope = document.getElementById("envelope");
     const letter = document.getElementById("letter");
     const hint = document.getElementById("hint");
+    const letterInner = document.getElementById("letterInner");
 
-    let stage = 1; // 1=sealed, 2=envelope open, 3=letter open
+    function fitLetterToViewport() {
+      if (!letter || !letterInner) return;
+      if (!body.classList.contains("stage-4")) return;
 
-    // Нажатие на конверт: 1 -> 2
+      letter.style.setProperty("--letter-scale", "1");
+
+      const available = letter.clientHeight - 28;
+      const needed = letterInner.scrollHeight;
+      if (available <= 0 || needed <= 0) return;
+
+      const scale = Math.max(0.75, Math.min(1, available / needed));
+      letter.style.setProperty("--letter-scale", String(scale));
+    }
+
+    let stage = 1;
+
     envelope.addEventListener("click", (e) => {
-      // если кликнули по листу, обработчик ниже разрулит
-      if (e.target.closest("#letter")) return;
+      if (e.target.closest("#letter") && stage === 1) return;
 
       if (stage === 1) {
         stage = 2;
         body.classList.remove("stage-1");
         body.classList.add("stage-2");
-        hint.textContent = "Нажми на лист 📄";
+        hint.textContent = "\u041f\u0435\u0447\u0430\u0442\u044c \u0441\u043d\u044f\u0442\u0430 \u2014 \u043f\u0438\u0441\u044c\u043c\u043e \u0432\u043d\u0443\u0442\u0440\u0438";
+        return;
+      }
+
+      if (stage === 2) {
+        stage = 3;
+        body.classList.remove("stage-2");
+        body.classList.add("stage-3");
+        hint.textContent = "\u0412\u044b\u0442\u0430\u0449\u0438 \u043f\u0438\u0441\u044c\u043c\u043e";
+        return;
       }
     });
 
-    // Нажатие на лист: 2 -> 3, 3 -> (ничего)
     letter.addEventListener("click", (e) => {
       e.stopPropagation();
       if (stage === 2) {
         stage = 3;
         body.classList.remove("stage-2");
         body.classList.add("stage-3");
-        hint.textContent = "💌";
+        hint.textContent = "\u0412\u044b\u0442\u0430\u0449\u0438 \u043f\u0438\u0441\u044c\u043c\u043e";
+        return;
+      }
+
+      if (stage === 3) {
+        stage = 4;
+        body.classList.remove("stage-3");
+        body.classList.add("stage-4");
+        hint.textContent = "\u041e\u0442\u043a\u0440\u043e\u0439 \u043f\u0438\u0441\u044c\u043c\u043e";
+        requestAnimationFrame(() => requestAnimationFrame(fitLetterToViewport));
       }
     });
+
+    window.addEventListener("resize", () => {
+      if (stage === 4) fitLetterToViewport();
+    });
+
   </script>
 </body>
 </html>
-<!-- redeploy -->
